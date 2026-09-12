@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="GoalGrow financial-goal and empire-building prototype.">
+  <title>GoalGrow | Financial goals, rewards and empire</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="Main navigation">
+      <div class="brand"><div class="brand-mark">↗</div><div><strong>GoalGrow</strong><small>Invest · Play · Grow</small></div></div>
+      <nav class="nav">
+        <button class="active" data-action="navigate" data-view="dashboard"><span class="icon">⌂</span><span>Dashboard</span></button>
+        <button data-action="navigate" data-view="goals"><span class="icon">◎</span><span>Goals</span></button>
+        <button data-action="navigate" data-view="game"><span class="icon">♜</span><span>Empire game</span></button>
+        <button data-action="navigate" data-view="cashout"><span class="icon">₹</span><span>Cash out</span></button>
+        <button data-action="navigate" data-view="premium"><span class="icon">★</span><span>Premium</span></button>
+        <button data-action="navigate" data-view="account"><span class="icon">◉</span><span>Profile & wallet</span></button>
+        <button data-action="reset-demo"><span class="icon">↻</span><span>Reset demo</span></button>
+      </nav>
+      <p class="sidebar-note"><b>Prototype safety</b><br>Financial investments, billing, bank links and cash-outs are simulated locally. Production use needs authenticated, server-side payment and regulated money-movement providers.</p>
+    </aside>
+    <main class="main">
+      <header class="topbar"><span class="sync" id="syncStatus">Saved locally in this browser</span><div class="profile-chip"><div class="avatar"><img id="avatarImage" alt="Profile photo" hidden><span id="avatarInitial">R</span></div><span id="topUsername">Rick</span></div></header>
+
+      <section class="page active" id="dashboardView">
+        <section class="hero">
+          <div><div class="eyebrow">Your financial journey, gamified</div><h1>Set clear goals.<br>Build a stronger future.</h1><p>Track each contribution without ever exceeding its target. Earn reward points, grow a five-stage empire, and keep every action in one local demo ledger.</p><div class="button-row"><button class="btn" data-action="navigate" data-view="goals">Manage goals</button><button class="btn outline" data-action="navigate" data-view="game">Open empire</button></div></div>
+          <div class="hero-stats"><div class="hero-stat"><small>Reward points</small><b id="heroPoints">0</b></div><div class="hero-stat"><small>Game coins · cash-out rate</small><b><span id="heroCoins">0</span> · 100 = ₹1</b></div><div class="hero-stat"><small>Premium status</small><b id="heroPremium">Free</b></div></div>
+        </section>
+        <div class="section-head"><div><h2>Goal progress</h2><p>Every displayed investment is capped at the remaining goal amount.</p></div><button class="btn small" data-action="navigate" data-view="goals">Create a goal</button></div>
+        <div class="goals-grid grid" id="dashboardGoals"></div>
+        <div class="split grid" style="margin-top:18px"><section class="card"><h2 style="font:22px Georgia,serif;margin:0 0 8px">Add an investment</h2><p class="help">The amount validator rejects any contribution above the selected goal’s remaining balance.</p><form class="form" id="investForm" style="margin-top:14px"><label for="investmentGoal">Goal</label><select id="investmentGoal" name="goal" required></select><label for="investmentAmount">Amount (whole rupees)</label><input id="investmentAmount" name="amount" type="number" min="1" step="1" required><p class="help" id="investmentLimit">Choose an active goal.</p><label for="investmentType">Contribution type</label><select id="investmentType" name="type"><option>Monthly SIP</option><option>Lump sum</option></select><button class="btn" type="submit">Confirm investment</button></form></section><section class="card"><h2 style="font:22px Georgia,serif;margin:0">Recent activity</h2><div class="activity" id="dashboardActivity"></div></section></div>
+      </section>
+
+      <section class="page" id="goalsView">
+        <div class="view-title"><div><div class="eyebrow">Goal centre</div><h1>My financial goals</h1><p class="help">Free members can keep three active goals. Premium members have no active-goal limit.</p></div><span class="status" id="goalLimitStatus"></span></div>
+        <div class="stats-grid grid" id="goalStats"></div>
+        <div class="split grid" style="margin-top:18px"><section class="card"><h2 style="font:22px Georgia,serif;margin:0 0 5px">Create a goal</h2><p class="help">A target is a positive, whole-rupee amount. Completed goals remain visible but do not count toward the free active-goal limit.</p><form class="form" id="goalForm" style="margin-top:14px"><label for="goalName">Name</label><input id="goalName" name="name" maxlength="60" required placeholder="e.g. Emergency fund"><label for="goalTarget">Target amount (₹)</label><input id="goalTarget" name="target" type="number" min="100" max="1000000000" step="1" required><label for="goalDescription">Description</label><input id="goalDescription" name="description" maxlength="120" placeholder="What is this for?"><button class="btn" type="submit">Create goal</button></form></section><section class="card"><h2 style="font:22px Georgia,serif;margin:0">Investment rules</h2><div class="notice info" style="margin-top:13px"><b>Hard cap:</b> invested amount is normalized to 0…target on every load and checked again before every write. A completed goal cannot accept another contribution.</div><div class="notice" style="margin-top:12px"><b>Money safety:</b> this static prototype records no actual bank transfer. Use an authenticated API and an idempotency key for real payments.</div></section></div>
+        <div class="section-head"><div><h2>All goals</h2></div></div><div class="goals-grid grid" id="allGoals"></div>
+      </section>
+
+      <section class="page" id="gameView">
+        <div class="view-title"><div><div class="eyebrow">Financial Tycoon</div><h1>Build your empire</h1><p class="help">Each building has exactly five stages. XP follows a positive, capped progression curve, so upgrades cannot produce invalid levels.</p></div><button class="btn outline" data-action="play-round">Play reward round · 25 pts</button></div>
+        <div class="game-layout"><section class="empire"><div class="row"><div><div class="eyebrow">Empire level</div><h2>Level <span id="empireLevel">1</span></h2></div><div class="status gold" id="empireBuildings">0 / 6 built</div></div><p>Build and upgrade with reward points. The next level unlocks the next property; upgrading can never exceed stage 5.</p><div class="level-bar"><i id="empireXpBar"></i></div><div class="level-row"><span id="empireXp">0 / 500 XP</span><span id="empireUnlock">Next unlock: Savings Bank</span></div><div class="building-grid" id="buildings"></div></section><aside class="game-panel"><section class="card"><h3>Reward round</h3><p class="help">A round costs 25 points and earns a randomized 0–150 game coins. This is game currency, not an investment return.</p><div class="coins">🪙 <span id="gameCoins">0</span></div><p class="help" id="gameRoundResult">No round played yet.</p></section><section class="card"><h3>Daily game actions</h3><div id="challenges"></div></section><section class="card"><h3>Game ledger</h3><div class="activity" id="gameActivity"></div></section></aside></div>
+      </section>
+
+      <section class="page" id="premiumView">
+        <section class="premium-banner"><div><div class="eyebrow">GoalGrow Premium</div><h2>Unlimited goals. More momentum.</h2><p>Premium adds unlimited active goals, a 100-point weekly bonus, and 150 additional points for every goal achieved. Start a seven-day free trial only after consenting to ₹299/month billing; cancel any time before or after the trial.</p></div><button class="btn" data-action="navigate" data-view="account">View profile</button></section>
+        <div class="split grid" style="margin-top:18px"><section class="card"><h2 style="font:23px Georgia,serif;margin:0">Membership</h2><div class="subscription-state" id="subscriptionState"></div><form class="form" id="subscriptionForm"><label style="display:flex;gap:9px;align-items:flex-start;font-weight:500"><input id="billingConsent" name="consent" type="checkbox" style="width:auto;margin-top:3px"><span>I consent to being billed ₹299/month after my seven-day free trial unless I cancel. I understand this prototype does not process a real charge.</span></label><button class="btn" id="trialButton" type="submit">Start 7-day free trial</button></form><div class="button-row" style="margin-top:10px"><button class="btn danger small" id="cancelSubscriptionButton" data-action="cancel-subscription">Cancel renewal</button></div><p class="help" style="margin-top:12px">Cancellation schedules no future bill. Trial access continues until its trial end; paid access continues until the paid period ends.</p></section><section class="card"><h2 style="font:23px Georgia,serif;margin:0">Premium reward logic</h2><div class="notice info" style="margin-top:13px"><b>Weekly:</b> the 100-point bonus is awarded once per calendar week while Premium is active when the app next runs.</div><div class="notice info" style="margin-top:12px"><b>Goal completion:</b> rewards are granted from a one-time completion flag, preventing duplicate points after reloads or repeated renders.</div></section></div>
+      </section>
+
+      <section class="page" id="accountView">
+        <div class="view-title"><div><div class="eyebrow">Profile & wallet</div><h1>Your account</h1><p class="help">Profile changes are intentionally behind a verification step. Passwords are never stored in localStorage.</p></div></div>
+        <div class="split grid"><section class="card"><div class="account-card"><div class="big-avatar"><img id="bigAvatarImage" alt="Profile photo" hidden><span id="bigAvatarInitial">R</span></div><div><h2 id="profileName" style="font:25px Georgia,serif;margin:0">Rick</h2><p class="help" id="profileContact">No verified contact</p><span class="status" id="profilePoints">0 reward points</span></div></div><form class="form" id="profileForm" style="margin-top:20px"><label for="profileUsername">Username</label><input id="profileUsername" name="username" maxlength="40" required><label for="profilePhoto">Photo URL (https only)</label><input id="profilePhoto" name="photo" type="url" placeholder="https://example.com/photo.jpg"><label for="profileMethod">Verify through</label><select id="profileMethod" name="method"><option value="email">Email</option><option value="phone">Phone</option></select><label for="profileContactInput">Email address or phone number</label><input id="profileContactInput" name="contact" required placeholder="you@example.com or +919876543210"><label for="profilePassword">New password</label><input id="profilePassword" name="password" type="password" minlength="12" autocomplete="new-password" placeholder="At least 12 characters"><p class="help">A real deployment must submit the password only to a secure authentication provider over TLS; this demo rejects persistence of it.</p><button class="btn" type="submit">Request verification</button></form><div id="verificationPanel" style="margin-top:14px"></div></section><section class="card"><h2 style="font:23px Georgia,serif;margin:0">Linked bank accounts</h2><p class="help">Only masked identifiers are shown in this local prototype.</p><div class="bank-list" id="bankAccounts" style="margin-top:13px"></div><div class="notice info" style="margin-top:18px"><b>Ready to exchange game coins?</b><br>Use the dedicated Cash Out page to review the 100 coins = ₹1 rate and create a simulated request.</div><button class="btn" style="margin-top:13px" data-action="navigate" data-view="cashout">Open Cash Out</button></section></div>
+      </section>
+
+      <section class="page" id="cashoutView">
+        <div class="view-title"><div><div class="eyebrow">Game coin exchange</div><h1>Cash out game coins</h1><p class="help">Exchange rate: 100 game coins = ₹1. This prototype records a simulated request; it does not move real money.</p></div><span class="status gold" id="cashoutCoinBalance">0 coins available</span></div>
+        <div class="split grid"><section class="card"><h2 style="font:23px Georgia,serif;margin:0">Create a cash-out request</h2><p class="help" style="margin-top:6px">Minimum 1,000 coins. Use whole 100-coin increments so each request has an exact rupee amount.</p><form class="form" id="exchangeForm" style="margin-top:14px"><label for="exchangeBank">Destination account</label><select id="exchangeBank" name="bank" required></select><label for="exchangeCoins">Game coins to exchange</label><input id="exchangeCoins" name="coins" type="number" min="1000" step="100" required placeholder="Minimum 1,000; multiples of 100"><p class="exchange-result" id="exchangeQuote">Enter a multiple of 100 coins to see the value.</p><button class="btn" type="submit">Create cash-out request</button></form></section><section class="card"><h2 style="font:23px Georgia,serif;margin:0">How the rate works</h2><div class="notice info" style="margin-top:14px"><b>100 coins = ₹1</b><br>1,000 coins = ₹10 · 5,000 coins = ₹50.</div><div class="notice" style="margin-top:14px"><b>Production requirement:</b> actual cash-out needs a regulated provider with server-side balances, KYC/AML review, fraud controls, idempotency, and bank-transfer integration.</div></section></div>
+        <div class="section-head"><div><h2>Cash-out requests</h2></div></div><div class="card"><div class="activity" id="exchangeHistory"></div></div>
+      </section>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
