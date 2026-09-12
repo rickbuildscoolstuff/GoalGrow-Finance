@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="GoalGrow financial-goal and empire-building prototype.">
+  <title>GoalGrow | Financial goals, rewards and empire</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="Main navigation">
+      <div class="brand"><div class="brand-mark">↗</div><div><strong>GoalGrow</strong><small>Invest · Play · Grow</small></div></div>
+      <nav class="nav">
+        <button class="active" data-action="navigate" data-view="dashboard"><span class="icon">⌂</span><span>Dashboard</span></button>
+        <button data-action="navigate" data-view="goals"><span class="icon">◎</span><span>Goals</span></button>
+        <button data-action="navigate" data-view="history"><span class="icon">☰</span><span>Investment history</span></button>
+        <button data-action="navigate" data-view="game"><span class="icon">🎮</span><span>Gaming</span></button>
+        <button data-action="navigate" data-view="cashout"><span class="icon">₹</span><span>Cash out</span></button>
+        <button data-action="navigate" data-view="premium"><span class="icon">★</span><span>Premium</span></button>
+        <button data-action="navigate" data-view="account"><span class="icon">◉</span><span>Profile & wallet</span></button>
+        <button data-action="reset-demo"><span class="icon">↻</span><span>Reset demo</span></button>
+      </nav>
+      <p class="sidebar-note"><b>Prototype safety</b><br>Financial investments, billing, bank links and cash-outs are simulated locally. Production use needs authenticated, server-side payment and regulated money-movement providers.</p>
+    </aside>
+    <main class="main">
+      <header class="topbar"><span class="sync" id="syncStatus">Saved locally in this browser</span><div class="profile-chip"><div class="avatar"><img id="avatarImage" alt="Profile photo" hidden><span id="avatarInitial">R</span></div><span id="topUsername">Rick</span></div></header>
+
+      <section class="page active" id="dashboardView">
+        <section class="hero">
+          <div><div class="eyebrow">Your financial journey, gamified</div><h1>Set clear goals.<br>Build a stronger future.</h1><p>Track each contribution without ever exceeding its target. Earn reward points, play mini-games, and keep every action in one local demo ledger.</p><div class="button-row"><button class="btn" data-action="navigate" data-view="goals">Manage goals</button><button class="btn outline" data-action="navigate" data-view="game">Open Gaming</button></div></div>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <small>Reward points</small>
+              <b id="heroPoints">0</b>
+            </div>
+            <div class="hero-stat">
+              <small>Redeemable value</small>
+              <b id="heroRedeemable">₹0</b>
+              <span class="rate-note">100 reward points = ₹1</span>
+            </div>
+            <div class="hero-stat">
+              <small>Premium status</small>
+              <b id="heroPremium">Free</b>
+            </div>
+          </div>
+        </section>
+        <div class="section-head"><div><h2>Goal progress</h2><p>Every displayed investment is capped at the remaining goal amount.</p></div><button class="btn small" data-action="navigate" data-view="goals">Create a goal</button></div>
+        <div class="goals-grid grid" id="dashboardGoals"></div>
+        <div class="split grid" style="margin-top:18px">
+          <section class="card chart-card">
+            <div class="chart-toolbar">
+              <div>
+                <h2 style="font:22px Georgia,serif;margin:0">Investment trajectory</h2>
+                <p class="help" style="margin-top:4px">Actual contributions vs expected path to target</p>
+              </div>
+              <div class="chart-controls">
+                <label class="sr-only" for="chartGoalSelect">Goal</label>
+                <select id="chartGoalSelect" aria-label="Select goal for chart"></select>
+                <div class="segmented" role="group" aria-label="Chart time scale">
+                  <button type="button" class="seg active" data-action="chart-scale" data-scale="days">Days</button>
+                  <button type="button" class="seg" data-action="chart-scale" data-scale="weeks">Weeks</button>
+                  <button type="button" class="seg" data-action="chart-scale" data-scale="months">Months</button>
+                </div>
+              </div>
+            </div>
+            <div class="chart-legend">
+              <span><i class="leg actual"></i> Actual invested</span>
+              <span><i class="leg expected"></i> Expected path</span>
+            </div>
+            <div class="chart-wrap">
+              <canvas id="investChart" width="800" height="320" aria-label="Investment line chart"></canvas>
+              <div class="chart-empty" id="chartEmpty" hidden>No investment history for this goal yet. Confirm a contribution to start the graph.</div>
+            </div>
+          </section>
+          <section class="card">
+            <h2 style="font:22px Georgia,serif;margin:0">Recent activity</h2>
+            <div class="activity" id="dashboardActivity" style="margin-top:12px"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="page" id="goalsView">
+        <div class="view-title"><div><div class="eyebrow">Goal centre</div><h1>My financial goals</h1><p class="help">Free members can keep three active goals. Premium members have no active-goal limit.</p></div><span class="status" id="goalLimitStatus"></span></div>
+        <div class="stats-grid grid" id="goalStats"></div>
+        <div class="split grid" style="margin-top:18px"><section class="card"><h2 style="font:22px Georgia,serif;margin:0 0 5px">Create a goal</h2><p class="help">Set a target amount and the time period in which you want to achieve it. Completed goals remain visible but do not count toward the free active-goal limit.</p><form class="form" id="goalForm" style="margin-top:14px"><label for="goalName">Name</label><input id="goalName" name="name" maxlength="60" required placeholder="e.g. Emergency fund"><label for="goalTarget">Target amount (₹)</label><input id="goalTarget" name="target" type="number" min="100" max="1000000000" step="1" required><label for="goalMonths">Time period (months)</label><input id="goalMonths" name="months" type="number" min="1" max="600" step="1" required placeholder="e.g. 24"><label for="goalDescription">Description</label><input id="goalDescription" name="description" maxlength="120" placeholder="What is this for?"><button class="btn" type="submit">Create goal</button></form></section><section class="card"><h2 style="font:22px Georgia,serif;margin:0">Goal rules</h2><div class="notice info" style="margin-top:13px"><b>Hard cap:</b> invested amount is normalized to 0…target on every load and checked again before every write. A completed goal cannot accept another contribution.</div><div class="notice info" style="margin-top:12px"><b>Edit target amount:</b> allowed once every 7 days per goal. New target cannot be below the amount already invested.</div><div class="notice info" style="margin-top:12px"><b>Delete goal:</b> allowed only after the goal has existed for 30 days.</div><div class="notice" style="margin-top:12px"><b>Money safety:</b> this static prototype records no actual bank transfer. Use an authenticated API and an idempotency key for real payments.</div></section></div>
+        <div class="section-head"><div><h2>All goals</h2></div></div><div class="goals-grid grid" id="allGoals"></div>
+      </section>
+
+      <section class="page" id="historyView">
+        <div class="view-title"><div><div class="eyebrow">Investment ledger</div><h1>Investment history</h1><p class="help">Every confirmed contribution is recorded here. Amounts are whole rupees and never exceed the goal remaining balance at the time of investment.</p></div><span class="status" id="historyCountStatus">0 investments</span></div>
+        <div class="stats-grid grid" id="historyStats"></div>
+        <div class="card" style="margin-top:18px">
+          <div class="row" style="margin-bottom:14px;flex-wrap:wrap;gap:12px">
+            <div>
+              <label for="historyGoalFilter" class="label" style="margin-bottom:6px">Filter by goal</label>
+              <select id="historyGoalFilter" style="min-width:220px;border:1px solid #cfded7;border-radius:9px;padding:10px;background:#fff">
+                <option value="">All goals</option>
+              </select>
+            </div>
+            <div>
+              <label for="historyTypeFilter" class="label" style="margin-bottom:6px">Contribution type</label>
+              <select id="historyTypeFilter" style="min-width:160px;border:1px solid #cfded7;border-radius:9px;padding:10px;background:#fff">
+                <option value="">All types</option>
+                <option value="Monthly SIP">Monthly SIP</option>
+                <option value="Lump sum">Lump sum</option>
+              </select>
+            </div>
+          </div>
+          <div class="history-table-wrap">
+            <table class="history-table" id="historyTable">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Goal</th>
+                  <th>Type</th>
+                  <th class="num">Amount</th>
+                </tr>
+              </thead>
+              <tbody id="historyBody"></tbody>
+            </table>
+          </div>
+          <div id="historyEmpty" class="empty" hidden>No investments recorded yet. Confirm a contribution from the Dashboard to build your history.</div>
+        </div>
+      </section>
+
+      <section class="page" id="gameView">
+        <div class="view-title">
+          <div>
+            <div class="eyebrow">Play & earn</div>
+            <h1>Gaming</h1>
+            <p class="help">Three mini-games. Spend Reward points to enter paid games, earn Reward points back for skill and consistency.</p>
+          </div>
+          <span class="status gold" id="gamingPointsBadge">0 Reward points</span>
+        </div>
+        <div class="gaming-menu" id="gamingMenu">
+          <article class="card gaming-card">
+            <div class="gaming-card-top">
+              <span class="gaming-emoji">📝</span>
+              <span class="status">Free</span>
+            </div>
+            <h3>Daily Quiz</h3>
+            <p class="help">5 finance questions each day. +25 Reward points per correct answer.</p>
+            <p class="help" id="quizStatus">Ready to play today.</p>
+            <button class="btn" data-action="start-quiz">Start quiz</button>
+          </article>
+          <article class="card gaming-card">
+            <div class="gaming-card-top">
+              <span class="gaming-emoji">🐦</span>
+              <span class="status gold">50 Reward points</span>
+            </div>
+            <h3>Pointie Bird</h3>
+            <p class="help">Classic Flappy-style flight. Tap to flap through green pipes. Entry costs 50 Reward points.</p>
+            <button class="btn" data-action="start-bird">Play · 50 Reward points</button>
+          </article>
+          <article class="card gaming-card">
+            <div class="gaming-card-top">
+              <span class="gaming-emoji">🃏</span>
+              <span class="status gold">100 Reward points</span>
+            </div>
+            <h3>Match-it-UP</h3>
+            <p class="help">16 cards, 8 pairs. Match them all in 30 seconds to win 200 Reward points.</p>
+            <button class="btn" data-action="start-match">Play · 100 Reward points</button>
+          </article>
+        </div>
+
+        <div id="quizPanel" class="card gaming-panel" hidden>
+          <div class="row">
+            <div>
+              <div class="eyebrow">Daily Quiz</div>
+              <h2 style="margin:4px 0 0;font:22px Georgia,serif">Question <span id="quizIndex">1</span> / 5</h2>
+            </div>
+            <button type="button" class="btn outline small" data-action="exit-game">Back to menu</button>
+          </div>
+          <p id="quizQuestion" style="margin:18px 0 12px;font-size:16px;font-weight:600"></p>
+          <div id="quizOptions" class="quiz-options"></div>
+          <p class="help" id="quizFeedback" style="margin-top:12px"></p>
+        </div>
+
+        <div id="birdPanel" class="card gaming-panel" hidden>
+          <div class="row">
+            <div>
+              <div class="eyebrow">Pointie Bird</div>
+              <h2 style="margin:4px 0 0;font:22px Georgia,serif">Time: <span id="birdTimer">59</span>s · Orbs: <span id="birdCoins">0</span> · Round pts: <span id="birdRoundPts">0</span></h2>
+            </div>
+            <button type="button" class="btn outline small" data-action="exit-game">Back to menu</button>
+          </div>
+          <canvas id="birdCanvas" width="480" height="320" style="width:100%;max-width:480px;height:auto;display:block;margin:14px auto 0;background:#87CEEB;border-radius:12px;cursor:pointer"></canvas>
+          <p class="help" id="birdHint" style="text-align:center;margin-top:10px">Tap to flap. Collect gold orbs (+5 pts each). Hit a pipe and your round points are credited — then you start again. 59s session.</p>
+        </div>
+
+        <div id="matchPanel" class="card gaming-panel" hidden>
+          <div class="row">
+            <div>
+              <div class="eyebrow">Match-it-UP</div>
+              <h2 style="margin:4px 0 0;font:22px Georgia,serif">Time: <span id="matchTimer">30</span>s · Matches: <span id="matchCount">0</span>/8</h2>
+            </div>
+            <button type="button" class="btn outline small" data-action="exit-game">Back to menu</button>
+          </div>
+          <div id="matchGrid" class="match-grid"></div>
+          <p class="help" id="matchStatus" style="text-align:center;margin-top:12px">Find all 8 pairs within 30 seconds.</p>
+        </div>
+      </section>
+
+      <section class="page" id="premiumView">
+        <section class="premium-banner"><div><div class="eyebrow">GoalGrow Premium</div><h2>Unlimited goals. More momentum.</h2><p>Premium adds unlimited active goals, a 100-point weekly bonus, and 150 additional points for every goal achieved. Start a seven-day free trial only after consenting to ₹299/month billing; cancel any time before or after the trial.</p></div><button class="btn" data-action="navigate" data-view="account">View profile</button></section>
+        <div class="split grid" style="margin-top:18px"><section class="card"><h2 style="font:23px Georgia,serif;margin:0">Membership</h2><div class="subscription-state" id="subscriptionState"></div><form class="form" id="subscriptionForm"><label style="display:flex;gap:9px;align-items:flex-start;font-weight:500"><input id="billingConsent" name="consent" type="checkbox" style="width:auto;margin-top:3px"><span>I consent to being billed ₹299/month after my seven-day free trial unless I cancel. I understand this prototype does not process a real charge.</span></label><button class="btn" id="trialButton" type="submit">Start 7-day free trial</button></form><div class="button-row" style="margin-top:10px"><button class="btn danger small" id="cancelSubscriptionButton" data-action="cancel-subscription">Cancel renewal</button></div><p class="help" style="margin-top:12px">Cancellation schedules no future bill. Trial access continues until its trial end; paid access continues until the paid period ends.</p></section><section class="card"><h2 style="font:23px Georgia,serif;margin:0">Premium reward logic</h2><div class="notice info" style="margin-top:13px"><b>Weekly:</b> the 100-point bonus is awarded once per calendar week while Premium is active when the app next runs.</div><div class="notice info" style="margin-top:12px"><b>Goal completion:</b> rewards are granted from a one-time completion flag, preventing duplicate points after reloads or repeated renders.</div></section></div>
+      </section>
+
+      <section class="page" id="accountView">
+        <div class="view-title"><div><div class="eyebrow">Profile & wallet</div><h1>Your account</h1><p class="help">Profile changes are intentionally behind a verification step. Passwords are never stored in localStorage.</p></div></div>
+        <div class="split grid">
+          <section class="card">
+            <div class="account-card">
+              <div class="big-avatar"><img id="bigAvatarImage" alt="Profile photo" hidden><span id="bigAvatarInitial">R</span></div>
+              <div>
+                <h2 id="profileName" style="font:25px Georgia,serif;margin:0">Rick</h2>
+                <p class="help" id="profileContact">No verified contact</p>
+                <span class="status" id="profilePoints">0 reward points</span>
+              </div>
+            </div>
+            <form class="form" id="profileForm" style="margin-top:20px">
+              <label for="profileUsername">Username</label>
+              <input id="profileUsername" name="username" maxlength="40" required>
+              <label for="profilePhoto">Photo URL (https only)</label>
+              <input id="profilePhoto" name="photo" type="url" placeholder="https://example.com/photo.jpg">
+              <label for="profileMethod">Verify through</label>
+              <select id="profileMethod" name="method"><option value="email">Email</option><option value="phone">Phone</option></select>
+              <label for="profileContactInput">Email address or phone number</label>
+              <input id="profileContactInput" name="contact" required placeholder="you@example.com or +919876543210">
+              <label for="profilePassword">New password</label>
+              <input id="profilePassword" name="password" type="password" minlength="12" autocomplete="new-password" placeholder="At least 12 characters">
+              <p class="help">A real deployment must submit the password only to a secure authentication provider over TLS; this demo rejects persistence of it.</p>
+              <button class="btn" type="submit">Request verification</button>
+            </form>
+            <div id="verificationPanel" style="margin-top:14px"></div>
+          </section>
+          <section class="card">
+            <h2 style="font:23px Georgia,serif;margin:0">Wallet</h2>
+            <p class="help" style="margin-top:6px">Funds from deleted goals arrive here after a 0.5% platform fee. Redeem to a linked bank account.</p>
+            <div class="wallet-balance-card" style="margin-top:14px">
+              <small>Available to redeem</small>
+              <b id="walletBalance">₹0</b>
+            </div>
+            <form class="form" id="walletRedeemForm" style="margin-top:16px">
+              <label for="walletRedeemBank">Destination account</label>
+              <select id="walletRedeemBank" name="bank" required></select>
+              <label for="walletRedeemAmount">Amount (₹)</label>
+              <input id="walletRedeemAmount" name="amount" type="number" min="1" step="1" required placeholder="e.g. 5000">
+              <p class="help" id="walletRedeemHint">Enter an amount up to your available wallet balance.</p>
+              <button class="btn" type="submit">Redeem to bank</button>
+            </form>
+            <div class="section-head" style="margin:22px 0 10px"><div><h2 style="font:18px Georgia,serif;margin:0">Payment summary</h2></div></div>
+            <div class="activity" id="walletHistory"></div>
+          </section>
+        </div>
+        <div class="split grid" style="margin-top:18px">
+          <section class="card">
+            <div class="row" style="align-items:flex-start">
+              <div>
+                <h2 style="font:23px Georgia,serif;margin:0">Linked accounts</h2>
+                <p class="help">Add UPI, Net Banking, or Bitcoin Wallet. Only masked identifiers are shown.</p>
+              </div>
+              <button type="button" class="btn small" data-action="open-add-account">Add account</button>
+            </div>
+            <div class="bank-list" id="bankAccounts" style="margin-top:13px"></div>
+            <div class="notice info" style="margin-top:18px"><b>Ready to exchange reward points?</b><br>Use the dedicated Cash Out page to review the 100 reward points = ₹1 rate and create a simulated request.</div>
+            <button class="btn" style="margin-top:13px" data-action="navigate" data-view="cashout">Open Cash Out</button>
+          </section>
+        </div>
+      </section>
+
+      <section class="page" id="cashoutView">
+        <div class="view-title"><div><div class="eyebrow">Reward point exchange</div><h1>Cash out reward points</h1><p class="help">This prototype records a simulated request; it does not move real money.</p></div>
+          <div class="cashout-balance-card">
+            <div class="cashout-balance-main">
+              <small>Redeemable value</small>
+              <b id="cashoutRedeemable">₹0</b>
+              <span class="rate-note">100 reward points = ₹1</span>
+            </div>
+            <span class="status gold" id="cashoutCoinBalance">0 reward points available</span>
+          </div>
+        </div>
+        <div class="split grid"><section class="card"><h2 style="font:23px Georgia,serif;margin:0">Create a cash-out request</h2><p class="help" style="margin-top:6px">Minimum 1,000 reward points. Use whole 100-point increments so each request has an exact rupee amount.</p><form class="form" id="exchangeForm" style="margin-top:14px"><label for="exchangeBank">Destination account</label><select id="exchangeBank" name="bank" required></select><label for="exchangeCoins">Reward points to exchange</label><input id="exchangeCoins" name="coins" type="number" min="1000" step="100" required placeholder="Minimum 1,000; multiples of 100"><p class="exchange-result" id="exchangeQuote">Enter a multiple of 100 reward points to see the value.</p><button class="btn" type="submit">Create cash-out request</button></form></section><section class="card"><h2 style="font:23px Georgia,serif;margin:0">Conversion rate</h2><div class="conversion-value" style="margin-top:14px"><b id="conversionRedeemable">₹0</b><span class="rate-note">100 reward points = ₹1</span></div><div class="notice info" style="margin-top:14px"><b>Examples</b><br>1,000 reward points = ₹10 · 5,000 reward points = ₹50 · 10,000 reward points = ₹100.</div><div class="notice" style="margin-top:14px"><b>Production requirement:</b> actual cash-out needs a regulated provider with server-side balances, KYC/AML review, fraud controls, idempotency, and bank-transfer integration.</div></section></div>
+        <div class="section-head"><div><h2>Cash-out requests</h2></div></div><div class="card"><div class="activity" id="exchangeHistory"></div></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="investModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="investModalTitle">
+      <button type="button" class="modal-close" data-action="close-invest-modal" aria-label="Close">×</button>
+      <div class="modal-header">
+        <div class="eyebrow">Contribute</div>
+        <h2 id="investModalTitle">Invest toward goal</h2>
+        <p class="help" id="investModalGoalMeta">Select a goal to continue.</p>
+      </div>
+      <form class="form" id="investForm">
+        <input type="hidden" id="investmentGoal" name="goal" required>
+        <label for="investmentAmount">Amount (whole rupees)</label>
+        <input id="investmentAmount" name="amount" type="number" min="1" step="1" required placeholder="e.g. 5000">
+        <p class="help" id="investmentLimit">Remaining balance applies as a hard cap.</p>
+        <label for="investmentType">Contribution type</label>
+        <select id="investmentType" name="type">
+          <option value="Monthly SIP">Monthly SIP (sets / updates the monthly amount)</option>
+          <option value="Lump sum">Lump sum (one-time top-up; keeps SIP plan if any)</option>
+        </select>
+        <p class="help">Lump sum can be added to a Monthly SIP goal at any time with no cooldown. It does not change the monthly SIP amount.</p>
+        <div class="modal-actions">
+          <button type="button" class="btn outline" data-action="close-invest-modal">Cancel</button>
+          <button class="btn" type="submit">Confirm investment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="editSipModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="editSipTitle">
+      <button type="button" class="modal-close" data-action="close-edit-sip" aria-label="Close">×</button>
+      <div class="modal-header">
+        <div class="eyebrow">Goal settings</div>
+        <h2 id="editSipTitle">Edit SIP</h2>
+        <p class="help" id="editSipMeta">Update target amount and time period.</p>
+      </div>
+      <form class="form" id="editSipForm">
+        <input type="hidden" id="editSipGoalId" name="goalId" required>
+        <label for="editSipAmount">Target amount (₹)</label>
+        <input id="editSipAmount" name="target" type="number" min="100" max="1000000000" step="1" required>
+        <p class="help" id="editSipAmountHint">Cannot be below the amount already invested. Target amount can be changed once every 7 days.</p>
+        <label for="editSipMonths">Months to achieve</label>
+        <input id="editSipMonths" name="months" type="number" min="1" max="600" step="1" placeholder="e.g. 18">
+        <p class="help">Leave blank to keep the current time period.</p>
+        <div class="modal-actions">
+          <button type="button" class="btn outline" data-action="close-edit-sip">Cancel</button>
+          <button class="btn" type="submit">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+
+  <div class="modal-backdrop" id="addAccountModal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="addAccountTitle">
+      <button type="button" class="modal-close" data-action="close-add-account" aria-label="Close">×</button>
+      <div class="modal-header">
+        <div class="eyebrow">Payments</div>
+        <h2 id="addAccountTitle">Add linked account</h2>
+        <p class="help" id="addAccountMeta">Choose how you want to link a payout method.</p>
+      </div>
+      <div id="addAccountTypeStep">
+        <div class="account-type-grid">
+          <button type="button" class="account-type-btn" data-action="select-account-type" data-type="upi">
+            <span class="account-type-icon">📱</span>
+            <strong>UPI</strong>
+            <small>UPI ID / VPA</small>
+          </button>
+          <button type="button" class="account-type-btn" data-action="select-account-type" data-type="netbanking">
+            <span class="account-type-icon">🏦</span>
+            <strong>Net Banking</strong>
+            <small>Bank account transfer</small>
+          </button>
+          <button type="button" class="account-type-btn" data-action="select-account-type" data-type="bitcoin">
+            <span class="account-type-icon">₿</span>
+            <strong>Bitcoin Wallet</strong>
+            <small>Crypto payout address</small>
+          </button>
+        </div>
+      </div>
+      <form class="form" id="addAccountForm" hidden>
+        <input type="hidden" id="addAccountType" name="type" required>
+        <label for="addAccountName" id="addAccountNameLabel">Account name</label>
+        <input id="addAccountName" name="name" maxlength="60" required placeholder="e.g. HDFC Salary">
+        <label for="addAccountIdentifier" id="addAccountIdLabel">Account number / identifier</label>
+        <input id="addAccountIdentifier" name="identifier" maxlength="80" required placeholder="Last digits or wallet address">
+        <p class="help" id="addAccountHint">Only a masked identifier is stored in this demo.</p>
+        <div class="modal-actions">
+          <button type="button" class="btn outline" data-action="back-account-type">Back</button>
+          <button class="btn" type="submit">Link account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
